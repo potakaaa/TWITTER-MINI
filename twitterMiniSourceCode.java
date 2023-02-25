@@ -426,7 +426,10 @@ public class miniTwitter {
                                                 break;
                                             }
                                         }
-                                        if (boolEnterTweetValidator) {
+                                        if (interactTweet == 0) {
+                                            System.out.println("Tweet ID doesn't exist!");
+                                            System.out.println();
+                                        } else if (boolEnterTweetValidator) {
                                             boolEnterTweet = true;
                                         } else {
                                             System.out.println("Tweet ID doesn't exist!");
@@ -475,6 +478,8 @@ public class miniTwitter {
                                         methods.CodeInvalid("Interact Code");
                                     }
                                 }
+                            } else {
+                                methods.CodeInvalid("Interact Tweet");
                             }
                         }
                     } else if (homepageCode.equalsIgnoreCase("tw")) {
