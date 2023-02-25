@@ -57,7 +57,9 @@ public class miniTwitter {
 
                 if (liOrSu.equalsIgnoreCase("su")) {
                     methods.LoadingAnim("Loading");
-                    boolean boolNewUsername = false; boolean boolUserValidator = false;
+                    System.out.println();
+                    boolean boolNewUsername = false;
+                    boolean boolUserValidator = false;
                     while (!boolNewUsername) {
                         System.out.print("Enter New Username: ");
                         newUsername = sc.nextLine();
@@ -70,7 +72,8 @@ public class miniTwitter {
                                 } else {
                                     boolUserValidator = true;
                                 }
-                            } if (boolUserValidator) {
+                            }
+                            if (boolUserValidator) {
                                 boolNewUsername = true;
                             }
                         } else {
@@ -131,7 +134,9 @@ public class miniTwitter {
                             boolBirthDay = true;
                         }
                     }
-                    Integer.toString(newYear); Integer.toString(newMonth); Integer.toString(newDay);
+                    Integer.toString(newYear);
+                    Integer.toString(newMonth);
+                    Integer.toString(newDay);
                     newBirthday = newYear + "-" + newMonth + "-" + newDay;
 
                     System.out.println();
@@ -171,8 +176,15 @@ public class miniTwitter {
                             "\"" + newSecuQuestion + "\", \"" + newSecuAnswer + "\", \"" + newFollowers + "\", \"" + newFollowing + "\")";
                     st.executeUpdate(newAccountQuery);
 
+                    String userTable = newUsername + "_account";
+                    String createTableQuery = "CREATE TABLE IF NOT EXISTS " + userTable + " (post_id INT NOT NULL AUTO_INCREMENT, posts VARCHAR(280) NOT NULL, likes INT NOT NULL, retweets INT NOT NULL, PRIMARY KEY (post_id))";
+                    st.executeUpdate(createTableQuery);
+
                     boolLiOrSu = true;
                     methods.LoadingAnim("Creating Account");
+                    System.out.println();
+                    System.out.println("Account Created!");
+                    System.out.println();
 
                 } else if (liOrSu.equalsIgnoreCase("li")) {
                     boolLiOrSu = true;
@@ -180,19 +192,21 @@ public class miniTwitter {
                     methods.CodeInvalid("Log In or Sign Up");
                 }
                 int exisCounter = 0;
-                while (rs.next()) {
-                    exisID[exisCounter] = rs.getInt("account_id");
-                    exisUsername[exisCounter] = rs.getString("account_username");
-                    exisPassword[exisCounter] = rs.getString("account_password");
-                    exisBirthday[exisCounter] = rs.getString("account_birthday");
-                    exisSecuQuestion[exisCounter] = rs.getString("account_security_question");
-                    exisSecuAnswer[exisCounter] = rs.getString("account_security_answer");
-                    exisFollowers[exisCounter] = rs.getInt("account_followers");
-                    exisFollowing[exisCounter] = rs.getInt("account_following");
+                ResultSet rs2 = st.executeQuery("select * from mini_twitter_accounts");
+                while (rs2.next()) {
+                    exisID[exisCounter] = rs2.getInt("account_id");
+                    exisUsername[exisCounter] = rs2.getString("account_username");
+                    exisPassword[exisCounter] = rs2.getString("account_password");
+                    exisBirthday[exisCounter] = rs2.getString("account_birthday");
+                    exisSecuQuestion[exisCounter] = rs2.getString("account_security_question");
+                    exisSecuAnswer[exisCounter] = rs2.getString("account_security_answer");
+                    exisFollowers[exisCounter] = rs2.getInt("account_followers");
+                    exisFollowing[exisCounter] = rs2.getInt("account_following");
                     exisCounter++;
                 }
 
-                boolean boolLogUser = false; boolean boolLogUserValidator = false;
+                boolean boolLogUser = false;
+                boolean boolLogUserValidator = false;
                 while (!boolLogUser) {
                     System.out.print("Enter Username: ");
                     logUsername = sc2.nextLine();
@@ -209,14 +223,19 @@ public class miniTwitter {
                             boolLogUserValidator = true;
                             break;
                         }
-                    } if (boolLogUserValidator) {
+                    }
+                    if (boolLogUserValidator) {
                         boolLogUser = true;
                     } else {
                         System.out.println("Invalid Username!");
                         System.out.println();
                     }
                 }
-                boolean boolLogPass = false; boolean boolLogPassValidator = false;
+                boolean boolLogPass = false;
+                boolean boolLogPassValidator = false;
+
+                String userAccTable = logUsername + "_account";
+                int attempt = 0;
                 while (!boolLogPass) {
                     System.out.print("Enter Password: ");
                     logPassword = sc2.nextLine();
@@ -226,132 +245,231 @@ public class miniTwitter {
                             boolLogPassValidator = true;
                             break;
                         }
-                    } if (boolLogPassValidator) {
+                    }
+                    if (boolLogPassValidator) {
                         boolLogPass = true;
                     } else {
                         System.out.println("Invalid Password!");
                         System.out.println();
+
+                        attempt++;
+                        if (attempt == 3) {
+                            boolean boolForgetPass = false;
+                            while (!boolForgetPass) {
+                                System.out.print("Forget Password? (y/n): ");
+                                String forgetPass = sc4.nextLine();
+                                if (forgetPass.equalsIgnoreCase("y")) {
+                                    System.out.println();
+                                    boolean boolSecuQuestion = false;
+                                    while (!boolSecuQuestion) {
+                                        System.out.print(logSecuQuestion + " ");
+                                        String forgetPassAnswer = sc4.nextLine();
+                                        if (forgetPassAnswer.equalsIgnoreCase(logSecuAnswer)) {
+                                            boolean boolNewPass = false;
+                                            while (!boolNewPass) {
+                                                System.out.print("Enter New Password: ");
+                                                String newAccPassword = sc4.nextLine();
+                                                if (newAccPassword.matches(".*[a-zA-Z].*") && newAccPassword.matches(".*[0-9].*") && newAccPassword.length() >= 8) {
+                                                    String updateNewPass = "UPDATE mini_twitter_accounts SET account_password = 'hello' WHERE account_id = " + userId;
+                                                    st.executeUpdate(updateNewPass);
+                                                    methods.LoadingAnim("Updating Password");
+                                                    System.out.println();
+                                                    System.out.println("Password Successfully Updated!");
+                                                    System.out.println();
+                                                    boolNewPass = true;
+                                                    boolForgetPass = true;
+                                                    boolSecuQuestion = true;
+                                                    boolLogPass = true;
+                                                } else {
+                                                    methods.PasswordInvalid("New Password");
+                                                }
+                                            }
+                                        } else {
+                                            System.out.println("Wrong Answer! Try Again!");
+                                            System.out.println();
+                                        }
+                                    }
+                                } else if (forgetPass.equalsIgnoreCase("n")) {
+                                    boolForgetPass = true;
+                                }
+                            }
+                        }
+
                     }
                 }
 
                 methods.LoadingAnim("Logging In");
 
+                System.out.println();
+                System.out.println();
                 System.out.println("          TwitterMini");
                 System.out.println();
                 System.out.println("@" + logUsername);
                 System.out.println(logBirthday);
-                System.out.print(logFollowing + " Following" + "   " + logFollowers + " Followers" );
+                System.out.print(logFollowing + " Following" + "   " + logFollowers + " Followers");
                 System.out.println();
                 System.out.println("Connect with Friends!");
-                while (rs.next()) {
-                    System.out.println("User ID: " + rs.getInt("account_id"));
-                    System.out.println("Username: @" + rs.getString("account_username"));
-                    System.out.println();
-                }
-                System.out.println("Interact with users!");
+                System.out.println();
 
-                boolean boolSelectUser = false; boolean boolSelectUserValidator = false;
-                while (!boolSelectUser) {
-                    System.out.print("Enter User ID: ");
-                    try {
-                        int selectID = sc3.nextInt();
-                        for (int i = 0; i < exisID.length; i++) {
-                            if (selectID == exisID[i]) {
-                                userId = exisID[i];
-                                userName = exisUsername[i];
-                                userBirthday = exisBirthday[i];
-                                userFollowing = exisFollowing[i];
-                                userFollowers = exisFollowers[i];
-                                boolSelectUserValidator = true;
-                                break;
-                            }
-                        }
-                        if (boolSelectUserValidator) {
-                            boolSelectUser = true;
-                        } else {
-                            System.out.println("User ID doesn't exist!");
+                boolean boolHomepageCode = false;
+                while (!boolHomepageCode) {
+                    System.out.println();
+                    System.out.println("+------------------------+");
+                    System.out.println("|  CODE  |     OPTION    |");
+                    System.out.println("+------------------------+");
+                    System.out.println("|   TW   |     TWEET     |");
+                    System.out.println("|   IT   |    INTERACT   |");
+                    System.out.println("|   EX   |     EXIT      |");
+                    System.out.println("+------------------------+");
+                    System.out.println();
+                    System.out.print("Enter Code: ");
+                    String homepageCode = sc4.nextLine();
+
+                    if (homepageCode.equalsIgnoreCase("it")) {
+                        ResultSet showUsers = st.executeQuery("select * from mini_twitter_accounts");
+                        while (showUsers.next()) {
+                            System.out.println("User ID: " + showUsers.getInt("account_id"));
+                            System.out.println("Username: @" + showUsers.getString("account_username"));
                             System.out.println();
                         }
-                    } catch (InputMismatchException e) {
-                        methods.NumericalError("User ID");
-                        sc3.nextLine();
-                    }
-                }
-                String selectAccountName = userName + "_account";
-                ResultSet rs2 = st.executeQuery("select * from " + selectAccountName);
-
-                System.out.println("@" + userName);
-                System.out.println(userBirthday);
-                System.out.println(userFollowing + " Following" + "   " + userFollowers + " Followers" );
-                System.out.println();
-                System.out.println("        TWEETS");
-
-                int z = 0;
-                while (rs2.next()) {
-                    userPostID[z] = rs.getInt("post_id");
-                    userPost[z] = rs.getString("posts");
-                    System.out.println("Tweet ID: " + rs.getInt("post_id"));
-                    System.out.println(rs.getString("posts"));
-                    System.out.println("Likes: " + rs.getInt("likes"));
-                    System.out.println("Retweets: " + rs.getInt("retweets"));
-                    System.out.println();
-                }
-
-                boolean boolEnterTweet = false; boolean boolEnterTweetValidator = false;
-                while (!boolEnterTweet) {
-                    System.out.print("Enter Tweet ID to Interact: ");
-                    try {
-                        interactTweet = sc3.nextInt();
-                        for (int i = 0; i < userPostID.length; i++) {
-                            if (interactTweet == userPostID[i]) {
-                                interactPost = userPost[i];
-                                interactLikes = userPostLikes[i];
-                                interactRetweets = userPostRetweets[i];
-                                boolEnterTweetValidator = true;
-                                break;
+                        System.out.println("Interact with users!");
+                        boolean boolSelectUser = false;
+                        boolean boolSelectUserValidator = false;
+                        while (!boolSelectUser) {
+                            System.out.print("Enter User ID: ");
+                            try {
+                                int selectID = sc3.nextInt();
+                                for (int i = 0; i < exisID.length; i++) {
+                                    if (selectID == exisID[i]) {
+                                        userId = exisID[i];
+                                        userName = exisUsername[i];
+                                        userBirthday = exisBirthday[i];
+                                        userFollowing = exisFollowing[i];
+                                        userFollowers = exisFollowers[i];
+                                        boolSelectUserValidator = true;
+                                        break;
+                                    }
+                                }
+                                if (boolSelectUserValidator) {
+                                    boolSelectUser = true;
+                                } else {
+                                    System.out.println("User ID doesn't exist!");
+                                    System.out.println();
+                                }
+                            } catch (InputMismatchException e) {
+                                methods.NumericalError("User ID");
+                                sc3.nextLine();
                             }
-                        } if (boolEnterTweetValidator) {
-                            boolEnterTweet = true;
-                        } else {
-                            System.out.println("Tweet ID doesn't exist!");
-                            System.out.println();
                         }
-                    } catch (InputMismatchException e) {
-                        methods.NumericalError("Tweet ID");
-                        sc3.nextLine();
-                    }
-                }
-                System.out.println();
-                System.out.println("Tweet ID: " + interactTweet);
-                System.out.println(interactPost);
-                System.out.println();
-                System.out.println("+------------------------+");
-                System.out.println("|  CODE  |     OPTION    |");
-                System.out.println("+------------------------+");
-                System.out.println("|   LE   |      LIKE     |");
-                System.out.println("|   RT   |     RETWEET   |");
-                System.out.println("+------------------------+");
+                        String selectAccountName = userName + "_account";
+                        ResultSet rs3 = st.executeQuery("select * from " + selectAccountName);
 
-                boolean boolInteractCode = false;
-                while (!boolInteractCode) {
-                    System.out.println("Enter Code: ");
-                    String interactCode = sc4.nextLine();
+                        System.out.println("@" + userName);
+                        System.out.println(userBirthday);
+                        System.out.println(userFollowing + " Following" + "   " + userFollowers + " Followers");
+                        System.out.println();
+                        System.out.println("        TWEETS");
 
-                    System.out.println();
-                    if (interactCode.equalsIgnoreCase("le")) {
-                        interactLikes++;
-                        System.out.println("Tweet Liked!");
-                        String likeQuery = "UPDATE " + selectAccountName + " SET likes = \"" + interactLikes + "\" + WHERE post_id = \"" + interactTweet + "\"";
-                        st.executeUpdate(likeQuery);
-                        boolInteractCode = true;
-                    } else if (interactCode.equalsIgnoreCase("rt")) {
-                        interactRetweets++;
-                        System.out.println("Tweet Retweeted!");
-                        String likeQuery = "UPDATE " + selectAccountName + " SET likes = \"" + interactRetweets + "\" + WHERE post_id = \"" + interactTweet + "\"";
-                        st.executeUpdate(likeQuery);
-                        boolInteractCode = true;
+                        int z = 0;
+                        while (rs3.next()) {
+                            userPostID[z] = rs3.getInt("post_id");
+                            userPost[z] = rs3.getString("posts");
+                            System.out.println("Tweet ID: " + rs3.getInt("post_id"));
+                            System.out.println(rs3.getString("posts"));
+                            System.out.println("Likes: " + rs3.getInt("likes"));
+                            System.out.println("Retweets: " + rs3.getInt("retweets"));
+                            System.out.println();
+                            z++;
+                        }
+
+                        boolean boolEnterTweet = false;
+                        boolean boolEnterTweetValidator = false;
+                        while (!boolEnterTweet) {
+                            System.out.print("Enter Tweet ID to Interact: ");
+                            try {
+                                interactTweet = sc3.nextInt();
+                                for (int i = 0; i < userPostID.length; i++) {
+                                    if (interactTweet == userPostID[i]) {
+                                        interactPost = userPost[i];
+                                        interactLikes = userPostLikes[i];
+                                        interactRetweets = userPostRetweets[i];
+                                        boolEnterTweetValidator = true;
+                                        break;
+                                    }
+                                }
+                                if (boolEnterTweetValidator) {
+                                    boolEnterTweet = true;
+                                } else {
+                                    System.out.println("Tweet ID doesn't exist!");
+                                    System.out.println();
+                                }
+                            } catch (InputMismatchException e) {
+                                methods.NumericalError("Tweet ID");
+                                sc3.nextLine();
+                            }
+                        }
+                        System.out.println();
+                        System.out.println("Tweet ID: " + interactTweet);
+                        System.out.println(interactPost);
+                        System.out.println();
+                        System.out.println("+------------------------+");
+                        System.out.println("|  CODE  |     OPTION    |");
+                        System.out.println("+------------------------+");
+                        System.out.println("|   LE   |      LIKE     |");
+                        System.out.println("|   RT   |     RETWEET   |");
+                        System.out.println("+------------------------+");
+
+                        boolean boolInteractCode = false;
+                        while (!boolInteractCode) {
+                            System.out.print("Enter Code: ");
+                            String interactCode = sc4.nextLine();
+
+                            System.out.println();
+                            if (interactCode.equalsIgnoreCase("le")) {
+                                interactLikes++;
+                                String likeQuery = "UPDATE " + selectAccountName + " SET likes = " + interactLikes + " WHERE post_id = " + interactTweet;
+                                System.out.println("Tweet Liked!");
+                                st.executeUpdate(likeQuery);
+                                boolInteractCode = true;
+                            } else if (interactCode.equalsIgnoreCase("rt")) {
+                                interactRetweets++;
+                                String retweetQuery = "UPDATE " + selectAccountName + " SET likes = " + interactRetweets + " WHERE post_id = " + interactTweet;
+
+                                String retweetAddtoAcc = "Retweet from: " + "@" + userName + " \n " + interactPost;
+                                String retweetAddtoAccQuery = "INSERT INTO " + userAccTable + " VALUES (\"" + 0 + "\", \"" + retweetAddtoAcc + "\", \"" + 0 + "\", \"" + 0 + "\")";
+                                st.executeUpdate(retweetAddtoAccQuery);
+
+                                System.out.println("Tweet Retweeted!");
+                                st.executeUpdate(retweetQuery);
+                                boolInteractCode = true;
+                            } else {
+                                methods.CodeInvalid("Interact Code");
+                            }
+                        }
+                    } else if (homepageCode.equalsIgnoreCase("tw")) {
+                        boolean boolTweet = false;
+                        while (!boolTweet) {
+                            System.out.print("Tweet: ");
+                            String tweetPost = sc4.nextLine();
+                            if (tweetPost.length() > 250) {
+                                System.out.println("Tweet is too long! Maximum of 250 characters only!");
+                                System.out.println();
+                            } else {
+                                String postAddtoAccQuery = "INSERT INTO " + userAccTable + " VALUES (\"" + 0 + "\", \"" + tweetPost + "\", \"" + 0 + "\", \"" + 0 + "\")";
+                                st.executeUpdate(postAddtoAccQuery);
+                                methods.LoadingAnim("Tweeting");
+                                System.out.println();
+                                System.out.println("Successfully Tweeted!");
+                                boolTweet = true;
+                            }
+                        }
+                    } else if (homepageCode.equalsIgnoreCase("ex")) {
+                        System.out.println("Thank you for tweeting!");
+                        System.out.println();
+                        methods.LoadingAnim("Exiting");
+                        System.exit(0);
                     } else {
-                        methods.CodeInvalid("Interact Code");
+                        methods.CodeInvalid("Homepage Code");
                     }
                 }
             }
